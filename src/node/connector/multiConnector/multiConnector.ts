@@ -29,6 +29,8 @@ export class MultiConnector implements ConnectorFacade {
                 connector = {facade: connectorFactory.createConnector(kn.type), type: kn.type}
                 this.connectors.push(connector)
 
+
+
             }
 
             connector.facade.connect(kn.params);
