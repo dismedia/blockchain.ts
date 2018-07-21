@@ -8,7 +8,7 @@ const assert = chai.assert;
 
 describe("multiconnector", () => {
 
-    it('should connect for every known node type', () => {
+    it('should use factory for every known node type', () => {
 
 
         const knownNodes = from<KnownNode>([
@@ -24,68 +24,24 @@ describe("multiconnector", () => {
             }])
 
 
-        const factoryResults = {
-            "telepatic": {
-                connect: sinon.spy(), broadcast: () => {
-                }, messages: from([])
-            },
-            "email": {
-                connect: sinon.spy(), broadcast: () => {
-                }, messages: from([])
-            }
+        const factoryResults={
+            "telepatic": {connect:sinon.spy(),broadcast:()=>{},messages:null},
+            "email": {connect:sinon.spy(),broadcast:()=>{},messages:null}
 
         }
 
         let connectorFactory: ConnectorFactory = {
-            createConnector: (type) => {
-                return factoryResults[type]
+            createConnector: (type)=>{
+               return factoryResults[type]
             }
         }
 
         const sut = new MultiConnector(knownNodes, connectorFactory)
 
-        //console.log(factoryResults.email.connect)
+       //console.log(factoryResults.email.connect)
 
         assert.equal("brainOne", factoryResults.telepatic.connect.getCall(0).lastArg.host);
         assert.equal("erica@lambert.hell", factoryResults.email.connect.getCall(0).lastArg.host);
-
-    });
-
-    it('should use factory once for hosts with same type', () => {
-
-
-        const knownNodes = from<KnownNode>([
-            {
-                type: "telepatic",
-                params: {host: "brainOne"}
-
-            },
-            {
-                type: "telepatic",
-                params: {host: "brainTwo"}
-            }])
-
-
-        let connector =
-            {
-                connect: sinon.spy(),
-                broadcast: () => {
-                },
-                messages: from([])
-            }
-
-
-        let connectorFactory: any = {
-            createConnector: sinon.fake.returns(connector)
-        }
-
-        const sut = new MultiConnector(knownNodes, connectorFactory)
-
-
-
-        assert.equal(1,connectorFactory.createConnector.callCount)
-        assert.equal(2,connector.connect.callCount)
-
 
     });
 
