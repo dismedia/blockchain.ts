@@ -7,7 +7,7 @@ export const nodeStorage:PromiseFromObject<ConfigSource,ConfigData> = (source: C
 
     const defaultConfig: ConfigData = {
         connectors: {
-            websocet: {
+            websocket: {
                 port: 8870
             }
         }
