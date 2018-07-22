@@ -2,12 +2,12 @@
   "name": "bts",
   "version": "0.0.1",
   "dependencies": {
-    "@types/chai": "^4.1.4",
-    "@types/mocha": "^5.2.5",
+
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "node-storage": "^0.0.7",
     "rxjs": "^6.2.2",
+    "rxjs-compat": "^6.2.2",
     "rxjs-compat": "^6.2.2",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
@@ -17,6 +17,9 @@
     "mocha": "mocha --require ts-node/register --watch-extensions ts,tsx \"./**/*.spec.{ts,tsx}\""
   },
   "devDependencies": {
-    "@types/node": "^10.5.2"
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.5.2",
+    "sinon": "^6.1.4"
   }
 }

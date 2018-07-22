@@ -1,4 +1,4 @@
-import {Observable} from "rxjs/index";
+import {Observable} from "rxjs";
 import {NodeMessage} from "../message/nodeMessage";
 
 

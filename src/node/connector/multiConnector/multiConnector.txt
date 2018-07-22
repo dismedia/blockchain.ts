@@ -1,6 +1,6 @@
 import {ConnectorFacade, ConnectorFactory, ConnectorType, KnownNode} from "../connector";
 import {NodeMessage} from "../../message/nodeMessage";
-import {Observable} from "rxjs/index";
+import {Observable} from "rxjs";
 
 export class MultiConnector implements ConnectorFacade {
 
@@ -18,7 +18,7 @@ export class MultiConnector implements ConnectorFacade {
         //multiconnector cannot connect directly
     }
 
-    constructor(knownNodes: Observable<KnownNode>, connectorFactory: ConnectorFactory) {
+    constructor(config: knownNodes: Observable<KnownNode>, connectorFactory: ConnectorFactory) {
         this.connectors = [];
 
         knownNodes.subscribe((kn: KnownNode) => {
