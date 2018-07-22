@@ -1,5 +1,7 @@
 node_modules/
 .node_modules/
+.config
+config/
 built/*
 tests/cases/rwc/*
 tests/cases/test262/*
