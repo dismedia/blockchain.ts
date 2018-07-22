@@ -1,5 +1,8 @@
+import {ConnectorType} from "./connector/connector";
+
 export interface ConnectorSettings {
-    host: string
+    type: ConnectorType
+    params: any;
 }
 
 export interface ConfigData {

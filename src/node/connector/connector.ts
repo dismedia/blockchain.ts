@@ -3,19 +3,23 @@ import {NodeMessage} from "../message/nodeMessage";
 
 
 export interface ConnectorFacade {
-    broadcast(message: NodeMessage)
-    connect(params: any)
-    messages: Observable<NodeMessage>
+    messages: Observable<NodeMessage>;
+    status?: Observable<any>;
 
 }
 
 export type ConnectorType=string;
+export type ConnectionStatus = "unknown" | "connected"
 
-export interface KnownNode{
-    params:{
-        host:string
-    }
-    type:ConnectorType
+export type ConnectorStatusMessage = "started" | "connected" | "peerDiscovered"
+
+
+export interface PeerInfo {
+    connectionParms: any
+    type: ConnectorType;
+    id: string;
+
+
 }
 
 export interface ConnectorFactory{
