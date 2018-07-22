@@ -1,11 +1,18 @@
 import {Observable} from "rxjs";
 import {NodeMessage} from "../message/nodeMessage";
+import {ConnectorSettings} from "../configData";
 
 
 export interface ConnectorFacade {
     messages: Observable<NodeMessage>;
     status?: Observable<any>;
 
+}
+
+export interface ConnectorCreator {
+    (settings: Observable<ConnectorSettings>,
+     messagesToBroadcats: Observable<NodeMessage>,
+     peers: Observable<PeerInfo>): Observable<ConnectorFacade>
 }
 
 export type ConnectorType=string;
@@ -22,9 +29,6 @@ export interface PeerInfo {
 
 }
 
-export interface ConnectorFactory{
-    createConnector(type:ConnectorType):ConnectorFacade
-}
 
 
 

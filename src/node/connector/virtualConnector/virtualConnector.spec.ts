@@ -67,6 +67,9 @@ describe('virtual connector', () => {
 
 
             one.messages.subscribe(m => {
+
+                console.log(m);
+
                 assert.equal((<any>m).data, "data");
                 assert.equal(m.from, two.me);
 
