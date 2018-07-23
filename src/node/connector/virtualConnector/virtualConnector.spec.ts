@@ -16,7 +16,6 @@ describe('virtual connector', () => {
 
 
             const settings = new Subject<ConnectorSettings>();
-            const peers = new Subject<PeerInfo>();
 
             const connectors = [];
 
@@ -28,7 +27,7 @@ describe('virtual connector', () => {
             const messagesToBroadcat = from([]);
             const bus = new Subject<NodeMessage>();
 
-            virtualConnectorFactory(settings, messagesToBroadcat, peers).subscribe(c => connectors.push(c), () => {
+            virtualConnectorFactory(settings, messagesToBroadcat).subscribe(c => connectors.push(c), () => {
             }, () => check());
 
             settings.next({params: {bus}, type: "virtual"});
@@ -53,31 +52,23 @@ describe('virtual connector', () => {
             const messagesToBroadcat2 = new Subject<NodeMessage>();
             const messagesToBroadcat3 = from([]);
 
-            let one = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat1, peers);
-            let two = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat2, peers);
-            let three = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat3, peers);
+            let one = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat1);
+            let two = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat2);
 
             const idOne = one.me;
             const idTwo = two.me;
 
 
-            peers.next({id: idOne, type: "virtual", connectionParms: {}});
-            peers.next({id: idTwo, type: "virtual", connectionParms: {}});
-
-
             one.messages.subscribe(m => {
 
-                assert.equal((<any>m).data, "data");
+                assert.equal((<any>m).data, "data-from-connector-two");
                 assert.equal(m.from, two.me);
 
                 done()
             });
 
-            three.messages.subscribe(m => {
-                throw("should not get it, three is not a registered peer")
-            });
 
-            messagesToBroadcat2.next({data: "data"}as NodeMessage)
+            messagesToBroadcat2.next({data: "data-from-connector-two"}as NodeMessage)
 
 
         })

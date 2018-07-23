@@ -1,13 +1,13 @@
 import {ConnectorCreator, ConnectorFacade, PeerInfo} from "../connector";
-import {from, Observable, Subject} from "rxjs";
+import {Observable, Subject} from "rxjs";
 import {NodeMessage} from "../../message/nodeMessage";
 import {ConnectorSettings} from "../../configData";
-import {filter, map, scan, tap, withLatestFrom} from "rxjs/operators";
+import {filter, map} from "rxjs/operators";
 
-export const virtualConnectorFactory: ConnectorCreator = ((settings, messagesToBroadcats: Observable<NodeMessage>, peers: Observable<PeerInfo>) => settings.pipe(
+export const virtualConnectorFactory: ConnectorCreator = (settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
         filter((s: ConnectorSettings) => s.type == "virtual"),
-        map((settings: ConnectorSettings) => new VirtualConnector(settings, messagesToBroadcats, peers)))
-);
+    map((settings: ConnectorSettings) => new VirtualConnector(settings, messagesToBroadcats)));
+
 
 export class VirtualConnector implements ConnectorFacade {
 
@@ -17,44 +17,22 @@ export class VirtualConnector implements ConnectorFacade {
 
     peerList: Observable<PeerInfo[]>;
 
-    constructor(settings: ConnectorSettings, messagesToBroadcats: Observable<NodeMessage>, peers: Observable<PeerInfo>) {
+    constructor(settings: ConnectorSettings, messagesToBroadcats: Observable<NodeMessage>) {
 
         this.bus = settings.params.bus;
 
-        const aggregatedPeers: Observable<PeerInfo[]> = peers.pipe(
-            filter(p => p.id != this.me),
-            filter(p => p.type === "virtual"),
-
-            scan((a, peer: PeerInfo) => {
-                    a.push(peer);
-                    return a;
-
-                }, []
-            ));
-
         this.messages = this.bus.pipe(
             filter((message: NodeMessage) => {
-                return message.from != this.me && (<any>message).to == this.me
+                return message.from != this.me
             }),
-            tap(() => console.log(this.me + " got message")),
-            withLatestFrom(aggregatedPeers),
-            map(a => {
-
-                console.log(this.me + " !")
-                return a[0]
-            })
         );
 
         //this.messages.pipe(withLatestFrom(aggregatedPeers),tap((a)=>console.log(a)));
 
-        messagesToBroadcats.pipe(
-            withLatestFrom(aggregatedPeers)
-        ).subscribe((combined: any[]) => {
-            const [message, peers] = combined;
-            from(peers).subscribe((p: PeerInfo) => {
-                const nextMessage = Object.assign(message, {to: p.id, from: this.me});
-                this.bus.next(nextMessage)
-            })
+        messagesToBroadcats.subscribe((message) => {
+
+            const nextMessage = Object.assign(message, {from: this.me});
+            this.bus.next(nextMessage)
         })
 
     }

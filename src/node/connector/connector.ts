@@ -11,11 +11,10 @@ export interface ConnectorFacade {
 
 export interface ConnectorCreator {
     (settings: Observable<ConnectorSettings>,
-     messagesToBroadcats: Observable<NodeMessage>,
-     peers: Observable<PeerInfo>): Observable<ConnectorFacade>
+     messagesToBroadcats: Observable<NodeMessage>): Observable<ConnectorFacade>
 }
 
-export type ConnectorType=string;
+export type ConnectorType = string;
 export type ConnectionStatus = "unknown" | "connected"
 
 export type ConnectorStatusMessage = "started" | "connected" | "peerDiscovered"
