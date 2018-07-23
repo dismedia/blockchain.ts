@@ -30,9 +30,9 @@ describe('virtual connector', () => {
             virtualConnectorFactory(settings, messagesToBroadcat).subscribe(c => connectors.push(c), () => {
             }, () => check());
 
-            settings.next({params: {bus}, type: "virtual"});
-            settings.next({params: {bus}, type: "other"});
-            settings.next({params: {bus}, type: "virtual"});
+            settings.next({params: {bus}, type: "virtual", id: "0"});
+            settings.next({params: {bus}, type: "other", id: "1"});
+            settings.next({params: {bus}, type: "virtual", id: "2"});
             settings.complete();
 
 
@@ -52,24 +52,21 @@ describe('virtual connector', () => {
             const messagesToBroadcat2 = new Subject<NodeMessage>();
             const messagesToBroadcat3 = from([]);
 
-            let one = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat1);
-            let two = new VirtualConnector({params: {bus}, type: "virtual"}, messagesToBroadcat2);
+            let one = new VirtualConnector({params: {bus}, type: "virtual", id: "1"}, messagesToBroadcat1);
+            let two = new VirtualConnector({params: {bus}, type: "virtual", id: "2"}, messagesToBroadcat2);
 
-            const idOne = one.me;
-            const idTwo = two.me;
+
 
 
             one.messages.subscribe(m => {
 
                 assert.equal((<any>m).data, "data-from-connector-two");
-                assert.equal(m.from, two.me);
+                assert.equal(m.from, "2");
 
                 done()
             });
 
-
             messagesToBroadcat2.next({data: "data-from-connector-two"}as NodeMessage)
-
 
         })
 

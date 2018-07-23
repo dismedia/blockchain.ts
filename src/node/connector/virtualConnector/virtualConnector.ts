@@ -13,7 +13,6 @@ export class VirtualConnector implements ConnectorFacade {
 
     private bus: Subject<NodeMessage>;
     messages: Observable<NodeMessage>;
-    public me: string = Math.random().toString();
 
     peerList: Observable<PeerInfo[]>;
 
@@ -23,7 +22,7 @@ export class VirtualConnector implements ConnectorFacade {
 
         this.messages = this.bus.pipe(
             filter((message: NodeMessage) => {
-                return message.from != this.me
+                return message.from != settings.id
             }),
         );
 
@@ -31,7 +30,7 @@ export class VirtualConnector implements ConnectorFacade {
 
         messagesToBroadcats.subscribe((message) => {
 
-            const nextMessage = Object.assign(message, {from: this.me});
+            const nextMessage = Object.assign(message, {from: settings.id});
             this.bus.next(nextMessage)
         })
 
