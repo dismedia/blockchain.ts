@@ -6,7 +6,6 @@ import * as chai from "chai";
 import {NodeMessage} from "../../message/nodeMessage";
 import {from} from "rxjs/index";
 
-
 const assert = chai.assert;
 
 describe('virtual connector', () => {
@@ -67,8 +66,6 @@ describe('virtual connector', () => {
 
 
             one.messages.subscribe(m => {
-
-                console.log(m);
 
                 assert.equal((<any>m).data, "data");
                 assert.equal(m.from, two.me);
