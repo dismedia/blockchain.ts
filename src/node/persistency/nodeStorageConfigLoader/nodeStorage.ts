@@ -1,16 +1,13 @@
-import {ConfigData, ConfigSource} from "../storageConfigLoader";
+import {ConfigSource} from "../storageConfigLoader";
 import * as NodeStorage from "node-storage"
 import {PromiseFromObject} from "../../../mics/abstract";
+import {ConfigData} from "../../configData";
 
 
 export const nodeStorage:PromiseFromObject<ConfigSource,ConfigData> = (source: ConfigSource): Promise<ConfigData> => {
 
     const defaultConfig: ConfigData = {
-        connectors: {
-            websocket: {
-                port: 8870
-            }
-        }
+        connectors: []
     };
 
     return new Promise((res, rej) => {

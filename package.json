@@ -2,15 +2,15 @@
   "name": "bts",
   "version": "0.0.1",
   "dependencies": {
-
+    "@types/ws": "^5.1.2",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "node-storage": "^0.0.7",
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.2.2",
-    "rxjs-compat": "^6.2.2",
     "ts-node": "^7.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "ws": "^6.0.0"
   },
   "scripts": {
     "start": "ts-node index.ts",

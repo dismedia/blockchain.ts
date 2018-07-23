@@ -1,11 +1,11 @@
-import {ConnectorCreator, ConnectorFacade, PeerInfo} from "../connector";
+import {ConnectorCreator, ConnectorFacade} from "../connector";
 import {Observable, Subject} from "rxjs";
 import {NodeMessage} from "../../message/nodeMessage";
 import {ConnectorSettings} from "../../configData";
 import {filter, map} from "rxjs/operators";
 
-export const virtualConnectorFactory: ConnectorCreator = (settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
-        filter((s: ConnectorSettings) => s.type == "virtual"),
+export const virtualConnectorFactory: ConnectorCreator = (peers, settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
+    filter((s: ConnectorSettings) => s.type == "virtual"),
     map((settings: ConnectorSettings) => new VirtualConnector(settings, messagesToBroadcats)));
 
 
@@ -13,8 +13,6 @@ export class VirtualConnector implements ConnectorFacade {
 
     private bus: Subject<NodeMessage>;
     messages: Observable<NodeMessage>;
-
-    peerList: Observable<PeerInfo[]>;
 
     constructor(settings: ConnectorSettings, messagesToBroadcats: Observable<NodeMessage>) {
 

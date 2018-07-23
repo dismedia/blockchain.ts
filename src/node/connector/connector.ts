@@ -10,7 +10,8 @@ export interface ConnectorFacade {
 }
 
 export interface ConnectorCreator {
-    (settings: Observable<ConnectorSettings>,
+    (peers: Observable<PeerInfo[]>,
+     settings: Observable<ConnectorSettings>,
      messagesToBroadcats: Observable<NodeMessage>): Observable<ConnectorFacade>
 }
 

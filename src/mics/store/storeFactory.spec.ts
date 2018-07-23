@@ -1,4 +1,4 @@
-import {storeFacotory} from "./storeFactory";
+import {storeFactory} from "./storeFactory";
 import {Subject} from "rxjs/Rx";
 import * as chai from "chai";
 
@@ -13,8 +13,8 @@ describe('store facory', () => {
 
         const actions = new Subject<TestActions>();
 
-        let sut = storeFacotory<TestActions, TestActions[]>((action, state) => {
-            state.push(action)
+        let sut = storeFactory<TestActions, TestActions[]>((action, state) => {
+            state.push(action);
             return state
         }, [])(actions);
 

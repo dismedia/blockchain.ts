@@ -1,4 +1,4 @@
-import {storeFacotory} from "../../../mics/store/storeFactory";
+import {storeFactory} from "../../../mics/store/storeFactory";
 import {PeerInfo} from "../connector";
 
 export interface PeerAction {
@@ -12,14 +12,14 @@ const reducer = (action: PeerAction, state: PeerInfo[]) => {
 
     const methods = {
         addPeer: (payload: PeerInfo) => {
-            const newState = state.slice()
-            newState.push(payload)
+            const newState = state.slice();
+            newState.push(payload);
             return newState;
         },
         removePeer: (payload: PeerInfo) => {
 
-            const newState = state.slice()
-            const index = newState.findIndex(p => p.id == payload.id)
+            const newState = state.slice();
+            const index = newState.findIndex(p => p.id == payload.id);
             newState.splice(index, 1);
             return newState
         }
@@ -34,4 +34,4 @@ const reducer = (action: PeerAction, state: PeerInfo[]) => {
     return state
 };
 
-export const peerStoreFactory = storeFacotory<PeerAction, PeerInfo[]>(reducer, [])
+export const peerStoreFactory = storeFactory<PeerAction, PeerInfo[]>(reducer, []);

@@ -27,7 +27,7 @@ describe('virtual connector', () => {
             const messagesToBroadcat = from([]);
             const bus = new Subject<NodeMessage>();
 
-            virtualConnectorFactory(settings, messagesToBroadcat).subscribe(c => connectors.push(c), () => {
+            virtualConnectorFactory(null, settings, messagesToBroadcat).subscribe(c => connectors.push(c), () => {
             }, () => check());
 
             settings.next({params: {bus}, type: "virtual", id: "0"});
