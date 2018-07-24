@@ -3,7 +3,7 @@ import {from} from "rxjs/index";
 import {Observable} from "rxjs/Rx";
 import {mergeMap, withLatestFrom} from "rxjs/internal/operators";
 
-export const observableCollectionsDifferenceFactory =
+export const collectionDifference =
     <T, O>(compare: (a: T, b: O) => boolean) =>
         (externalCollection: Observable<T[]>,
          currentCollection: Observable<O[]>,) =>
@@ -16,4 +16,4 @@ export const observableCollectionsDifferenceFactory =
                     return external.filter(p => !current.some(c => compare(p, c)))
                 }),
                 mergeMap((unconnectedArray) => from(unconnectedArray))
-            ) as Observable<T>
+            ) as Observable<T>;

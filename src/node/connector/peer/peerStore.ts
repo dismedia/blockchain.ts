@@ -1,37 +1,8 @@
 import {storeFactory} from "../../../mics/store/storeFactory";
 import {PeerInfo} from "../connector";
+import {simpleReducerFactory, SimpleStoreAction} from "../../../mics/store/simpleReducer";
 
-export interface PeerAction {
 
-    action: "addPeer" | "removePeer"
-    payload: PeerInfo
+const comparer = (a: PeerInfo, b: PeerInfo) => a.id == b.id;
 
-}
-
-const reducer = (action: PeerAction, state: PeerInfo[]) => {
-
-    const methods = {
-        addPeer: (payload: PeerInfo) => {
-            const newState = state.slice();
-            newState.push(payload);
-            return newState;
-        },
-        removePeer: (payload: PeerInfo) => {
-
-            const newState = state.slice();
-            const index = newState.findIndex(p => p.id == payload.id);
-            newState.splice(index, 1);
-            return newState
-        }
-
-    };
-
-    if (methods[action.action]) {
-
-        state = methods[action.action](action.payload);
-    }
-
-    return state
-};
-
-export const peerStoreFactory = storeFactory<PeerAction, PeerInfo[]>(reducer, []);
+export const peerStoreFactory = storeFactory<SimpleStoreAction<PeerInfo>, PeerInfo[]>(simpleReducerFactory(comparer), []);

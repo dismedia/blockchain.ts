@@ -1,5 +1,5 @@
 import * as chai from "chai";
-import {observableCollectionsDifferenceFactory} from "./collectionsAgregator";
+import {collectionDifference} from "./collectionsAgregator";
 import {BehaviorSubject, Observable} from "rxjs/Rx";
 
 const assert = chai.assert;
@@ -11,26 +11,26 @@ describe('collection aggregator', () => {
         const externalSource = new BehaviorSubject<number[]>([]);
         const current = new BehaviorSubject<number[]>([9, 8]);
 
-        const numberCollectionsAggregator: Observable<number> = observableCollectionsDifferenceFactory<number, number>((a, b) => a == b)(externalSource, current)
+        const numberCollectionsAggregator: Observable<number> = collectionDifference<number, number>((a, b) => a == b)(externalSource, current);
 
         const assertions = [
 
             (r) => {
-                assert.equal(r, 1)
+                assert.equal(r, 1);
 
             },
             (r) => {
-                assert.equal(r, 2)
+                assert.equal(r, 2);
 
             },
             (r) => {
-                assert.equal(r, 9)
+                assert.equal(r, 9);
                 done();
             }
 
         ];
 
-        numberCollectionsAggregator.subscribe((r) => assertions.shift()(r))
+        numberCollectionsAggregator.subscribe((r) => assertions.shift()(r));
 
         externalSource.next([1]);
         externalSource.next([9, 2]);

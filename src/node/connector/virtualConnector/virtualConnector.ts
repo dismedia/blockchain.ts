@@ -1,21 +1,21 @@
-import {AsyncConnectable, ConnectorCreator, ConnectorFacade, PeerConnectionCreator, PeerInfo} from "../connector";
+import {AsyncConnectable, ConnectorFacade, PeerConnectionCreator, PeerInfo} from "../connector";
 import {Observable, Subject} from "rxjs";
 import {NodeMessage} from "../../message/nodeMessage";
-import {PeerAction, peerStoreFactory} from "../peer/peerStore";
-import {observableCollectionsDifferenceFactory} from "../../../mics/collectionsAgregator";
+import {peerStoreFactory} from "../peer/peerStore";
+import {collectionDifference} from "../../../mics/collectionsAgregator";
 import {tap} from "rxjs/internal/operators";
+import {SimpleStoreAction, SimpleStoreActionType as act} from "../../../mics/store/simpleReducer";
 
-export const connectorFactory: (connectionCreator: PeerConnectionCreator) => ConnectorCreator = (connectionCreator: PeerConnectionCreator) => (peers, messagesToBroadcats: Observable<NodeMessage>) => new Connector(connectionCreator, peers, messagesToBroadcats);
 
 export class Connector implements ConnectorFacade<NodeMessage> {
 
-    private bus: Subject<NodeMessage>;
+
     messages: Observable<NodeMessage>;
 
     constructor(connectionCreator: PeerConnectionCreator, peers: Observable<PeerInfo[]>, messagesToBroadcats: Observable<NodeMessage>) {
 
-        const pendingPeerAction = new Subject<PeerAction>();
-        const connetcedPeerAction = new Subject<PeerAction>();
+        const pendingPeerAction = new Subject<SimpleStoreAction<PeerInfo>>();
+        const connetcedPeerAction = new Subject<SimpleStoreAction<PeerInfo>>();
 
         const pendingPeers = peerStoreFactory(pendingPeerAction);
         const connectedPeers = peerStoreFactory(connetcedPeerAction);
@@ -23,23 +23,26 @@ export class Connector implements ConnectorFacade<NodeMessage> {
         // pendingPeerAction.subscribe(a=>console.log("pending peer action",a));
         // connetcedPeerAction.subscribe(a=>console.log("connected peer action",a));
 
-        const comparePeers = (a, b) => {
+        const comparePeers = (a, b) => a.id == b.id;
+        //const comparePeerWithConnectedPeer=(p:PeerInfo,cp:ConnectedPeer)=>p.id==cp.perr.id;
 
-            return a.id == b.id
-        }
-
-        const peerAboutToConnect = observableCollectionsDifferenceFactory<PeerInfo, any>(comparePeers)(peers, pendingPeers)
+        const peerAboutToConnect = collectionDifference<PeerInfo, any>(comparePeers)(peers, pendingPeers);
 
         connectionCreator(peerAboutToConnect.pipe(
-            tap((peer) => pendingPeerAction.next({action: "addPeer", payload: peer}))
+            tap((peer) => pendingPeerAction.next({action: act.add, payload: peer}))
         ))
             .subscribe((peer) => {
 
-                connetcedPeerAction.next({action: "addPeer", payload: peer})
-                pendingPeerAction.next({action: "removePeer", payload: peer})
+                connetcedPeerAction.next({action: act.add, payload: peer});
+                pendingPeerAction.next({action: act.remove, payload: peer});
             })
 
     }
+}
+
+export interface ConnectedPeer {
+    perr: PeerInfo,
+    connector: ConnectorFacade<NodeMessage>
 }
 
 const virtualConnectableFactory: () => AsyncConnectable<PeerInfo, PeerInfo> =
@@ -49,7 +52,7 @@ const virtualConnectableFactory: () => AsyncConnectable<PeerInfo, PeerInfo> =
             connectPeer: (peer) => Promise.resolve(peer)
         }
 
-    }
+    };
 
 
 

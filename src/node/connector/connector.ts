@@ -3,16 +3,21 @@ import {NodeMessage} from "../message/nodeMessage";
 import {mergeMap, withLatestFrom} from "rxjs/operators";
 import {PromiseFromObject} from "../../mics/abstract";
 import {from} from "rxjs/index";
+import {Connector} from "./virtualConnector/virtualConnector";
+
+
+export const connectorFactory: (connectionCreator: PeerConnectionCreator) => ConnectorCreator = (connectionCreator: PeerConnectionCreator) => (peers, messagesToBroadcats: Observable<NodeMessage>) => new Connector(connectionCreator, peers, messagesToBroadcats);
+
+
+export interface ConnectorCreator {
+    (peers: Observable<PeerInfo[]>,
+     messagesToBroadcats: Observable<NodeMessage>): ConnectorFacade<NodeMessage>
+}
 
 export interface ConnectorFacade<Messages> {
     messages: Observable<Messages>;
     status?: Observable<any>;
 
-}
-
-export interface ConnectorCreator {
-    (peers: Observable<PeerInfo[]>,
-     messagesToBroadcats: Observable<NodeMessage>): ConnectorFacade<NodeMessage>
 }
 
 export type ConnectorType = string;
