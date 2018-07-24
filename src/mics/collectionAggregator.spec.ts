@@ -11,7 +11,7 @@ describe('collection aggregator', () => {
         const externalSource = new BehaviorSubject<number[]>([]);
         const current = new BehaviorSubject<number[]>([9, 8]);
 
-        const numberCollectionsAggregator: Observable<number> = observableCollectionsDifferenceFactory<number>((a, b) => a == b)(externalSource, current)
+        const numberCollectionsAggregator: Observable<number> = observableCollectionsDifferenceFactory<number, number>((a, b) => a == b)(externalSource, current)
 
         const assertions = [
 

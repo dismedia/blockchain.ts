@@ -1,10 +1,9 @@
-import {VirtualConnector, virtualConnectorFactory} from "./virtualConnector";
-import {Subject} from "rxjs/Rx";
-import {ConnectorSettings} from "../../configData";
-import {PeerInfo} from "../connector";
+import {Connector} from "./virtualConnector";
+import {BehaviorSubject} from "rxjs/Rx";
+import {PeerConnectionCreator, PeerInfo} from "../connector";
 import * as chai from "chai";
-import {NodeMessage} from "../../message/nodeMessage";
 import {from} from "rxjs/index";
+import {mergeMap, tap} from "rxjs/internal/operators";
 
 const assert = chai.assert;
 
@@ -14,62 +13,55 @@ describe('virtual connector', () => {
 
         it('should be created from settings with specific type', (done) => {
 
+        });
 
-            const settings = new Subject<ConnectorSettings>();
+        describe('connector', () => {
 
-            const connectors = [];
+            it('should use connection factory on every new peer discovered', (done) => {
 
-            const check = () => {
-                assert.equal(connectors.length, 2);
-                done();
-            };
+                let testNetworkConnections = [];
 
-            const messagesToBroadcat = from([]);
-            const bus = new Subject<NodeMessage>();
+                const knownPeers: PeerInfo[] = [
+                    {id: "0", type: "virtual", connectionParms: {}},
+                    {id: "1", type: "virtual", connectionParms: {}}
+                ]
 
-            virtualConnectorFactory(null, settings, messagesToBroadcat).subscribe(c => connectors.push(c), () => {
-            }, () => check());
+                const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
 
-            settings.next({params: {bus}, type: "virtual", id: "0"});
-            settings.next({params: {bus}, type: "other", id: "1"});
-            settings.next({params: {bus}, type: "virtual", id: "2"});
-            settings.complete();
+                const connectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
+                    tap((p: PeerInfo) => console.log("connecting " + p.id)),
 
+                    mergeMap((p) => from(Promise.resolve(p))),
 
-        })
+                    tap((p: PeerInfo) => console.log("connected " + p.id)),
 
-    });
+                    tap(p => testNetworkConnections.push(p))
+                );
 
-    describe('connector', () => {
+                new Connector(connectionCreator, peers, from([]))
 
-        it('should send and receive messages via param bus', (done) => {
+                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
 
-            const peers = new Subject<PeerInfo>();
+                setTimeout(() => {
 
-            let bus = new Subject<NodeMessage>();
+                    console.log(testNetworkConnections)
 
-            const messagesToBroadcat1 = from([]);
-            const messagesToBroadcat2 = new Subject<NodeMessage>();
-            const messagesToBroadcat3 = from([]);
+                    done();
 
-            let one = new VirtualConnector({params: {bus}, type: "virtual", id: "1"}, messagesToBroadcat1);
-            let two = new VirtualConnector({params: {bus}, type: "virtual", id: "2"}, messagesToBroadcat2);
-
-
-
-
-            one.messages.subscribe(m => {
-
-                assert.equal((<any>m).data, "data-from-connector-two");
-                assert.equal(m.from, "2");
-
-                done()
-            });
-
-            messagesToBroadcat2.next({data: "data-from-connector-two"}as NodeMessage)
+                }, 1000)
+            })
 
         })
 
     })
-
 });
+
+const makeConnectionSim = (peer) => {
+    return new Promise((res, rej) => {
+        setTimeout(() => res(peer), Math.random() * 100)
+    })
+}
+
+makeConnectionSim({})
