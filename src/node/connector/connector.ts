@@ -6,7 +6,7 @@ import {from} from "rxjs/index";
 import {Connector} from "./virtualConnector/virtualConnector";
 
 
-export const connectorFactory: (connectionCreator: PeerConnectionCreator) => ConnectorCreator = (connectionCreator: PeerConnectionCreator) => (peers, messagesToBroadcats: Observable<NodeMessage>) => new Connector(connectionCreator, peers, messagesToBroadcats);
+export const connectorFactory: (connectionCreator: PeerConnectionCreator<PeerInfo>) => ConnectorCreator = (connectionCreator: PeerConnectionCreator<PeerInfo>) => (peers, messagesToBroadcats: Observable<NodeMessage>) => new Connector(connectionCreator, peers, messagesToBroadcats);
 
 
 export interface ConnectorCreator {
@@ -21,9 +21,7 @@ export interface ConnectorFacade<Messages> {
 }
 
 export type ConnectorType = string;
-export type ConnectionStatus = "unknown" | "connected"
 
-export type ConnectorStatusMessage = "started" | "connected" | "peerDiscovered"
 
 
 export interface PeerInfo {
@@ -37,14 +35,14 @@ interface SocketPeer<Message> {
     (messagesToBroadcast: Observable<Message>): { peer: PeerInfo, connection: ConnectorFacade<Message> }
 }
 
-export interface PeerConnectionCreator {
+export interface PeerConnectionCreator<ConnectedPeer> {
 
-    (peers: Observable<PeerInfo>): Observable<PeerInfo>
+    (peers: Observable<PeerInfo>): Observable<ConnectedPeer>
 
 }
 
 export interface AsyncPeerConnectionFactory {
-    (socket: Observable<AsyncConnectable<PeerInfo, PeerInfo>>): PeerConnectionCreator
+    (socket: Observable<AsyncConnectable<PeerInfo, PeerInfo>>): PeerConnectionCreator<PeerInfo>
 }
 
 export const asyncPeerConnectionFactory: AsyncPeerConnectionFactory =

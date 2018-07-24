@@ -27,7 +27,7 @@ describe('store facory', () => {
             done();
 
         })
-    })
+    });
 
     it('should give current state', (done) => {
 
@@ -48,7 +48,7 @@ describe('store facory', () => {
                 assert.equal(s[4], 100);
                 done();
             }
-        })
+        });
 
         actions.next(100)
 
