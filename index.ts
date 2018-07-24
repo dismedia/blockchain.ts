@@ -1,8 +1,7 @@
 import {WebsocketConnector} from "./src/node/connector/websocketConnector/websocketConnector";
-import {PeerAction, peerStoreFactory} from "./src/node/connector/peerPoolStore/peerStore";
+import {PeerAction, peerStoreFactory} from "./src/node/connector/peer/peerStore";
 import {PeerInfo} from "./src/node/connector/connector";
 import {Subject} from "rxjs/Rx";
-
 
 const actions = new Subject<PeerAction>();
 

@@ -1,14 +1,11 @@
 import {ConnectorSettings} from "../../configData";
-import {from, Observable} from "rxjs";
+import {Observable} from "rxjs";
 import {filter, map} from "rxjs/operators";
 import {ConnectorCreator, ConnectorFacade, PeerInfo} from "../connector";
 import {NodeMessage} from "../../message/nodeMessage";
 import * as WebSocket from "ws";
-import {PeerAction, peerStoreFactory} from "../peerPoolStore/peerStore";
-import {mergeMap, withLatestFrom} from "rxjs/internal/operators";
-import {fromPromise} from "rxjs/internal/observable/fromPromise";
+import {PeerAction} from "../peer/peerStore";
 import {Subject} from "rxjs/Rx";
-
 
 export const websocketConnectorFactory: ConnectorCreator = (peers: Observable<PeerInfo[]>, settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
     filter((s: ConnectorSettings) => s.type == "websocket"),
@@ -26,18 +23,18 @@ export class WebsocketConnector implements ConnectorFacade {
 
         const actions = new Subject<PeerAction>();
 
-        this.connectedPeers = peerStoreFactory(actions);
-
-        peers.pipe(
-            withLatestFrom(this.connectedPeers),
-
-            map(([peers, connected]) => {
-                return peers.filter(p => !connected.some(c => c.id == p.id))
-            }),
-            mergeMap((unconnectedArray) => from(unconnectedArray).pipe(
-                mergeMap((unconected) => fromPromise(this.connectPeer(unconected)))
-            )),
-        ).subscribe(a => console.log(a), (e) => console.log("cant connect " + e.id), () => console.log("done"))
+        // this.connectedPeers = peerStoreFactory(actions);
+        //
+        // peers.pipe(
+        //     withLatestFrom(this.connectedPeers),
+        //
+        //     map(([peers, connected]) => {
+        //         return peers.filter(p => !connected.some(c => c.id == p.id))
+        //     }),
+        //     mergeMap((unconnectedArray) => from(unconnectedArray).pipe(
+        //         mergeMap((unconected) => fromPromise(this.connectPeer(unconected)))
+        //     )),
+        // ).subscribe(a => console.log(a), (e) => console.log("cant connect " + e.id), () => console.log("done"))
 
 
         //peerStoreFactory(peerActions)
