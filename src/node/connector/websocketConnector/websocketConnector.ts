@@ -1,11 +1,13 @@
 import {ConnectorSettings} from "../../configData";
-import {Observable} from "rxjs";
-import {filter, map} from "rxjs/operators";
-import {ConnectorCreator, ConnectorFacade, PeerInfo} from "../connector";
+import {from, Observable} from "rxjs";
+import {filter, map, mergeMap, withLatestFrom} from "rxjs/operators";
+import {ConnectorCreator, ConnectorFacade, PeerConnectionCreator, PeerInfo} from "../connector";
 import {NodeMessage} from "../../message/nodeMessage";
 import * as WebSocket from "ws";
 import {PeerAction} from "../peer/peerStore";
 import {Subject} from "rxjs/Rx";
+
+import {PromiseFromObject} from "../../../mics/abstract";
 
 export const websocketConnectorFactory: ConnectorCreator = (peers: Observable<PeerInfo[]>, settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
     filter((s: ConnectorSettings) => s.type == "websocket"),
@@ -74,4 +76,21 @@ export class WebsocketConnector implements ConnectorFacade {
 
         return Promise.resolve(p)
     }
+}
+
+export const asyncPeerConnectionFactory: (socket: Observable<asyncConnectable<PeerInfo>>) => PeerConnectionCreator =
+    (websocket: Observable<any>) =>
+        (peers: Observable<PeerInfo>) =>
+            peers.pipe(
+                withLatestFrom(websocket),
+                mergeMap(combined => {
+                    const [peer, websocket] = combined
+                    return from(websocket.connectPeer(peer))
+                }),
+            )
+
+interface asyncConnectable<I> {
+
+    connectPeer: PromiseFromObject<I, I>
+
 }

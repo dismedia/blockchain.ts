@@ -2,7 +2,6 @@ import {Observable} from "rxjs";
 import {NodeMessage} from "../message/nodeMessage";
 import {ConnectorSettings} from "../configData";
 
-
 export interface ConnectorFacade {
     messages: Observable<NodeMessage>;
     status?: Observable<any>;
@@ -29,7 +28,9 @@ export interface PeerInfo {
 
 }
 
+export interface PeerConnectionCreator {
 
+    (peers: Observable<PeerInfo>): Observable<PeerInfo>
 
-
+}
 
