@@ -7,61 +7,46 @@ import {mergeMap, tap} from "rxjs/internal/operators";
 
 const assert = chai.assert;
 
-describe('virtual connector', () => {
 
-    describe('factory', () => {
+describe('connector', () => {
 
-        it('should be created from settings with specific type', (done) => {
+    it('should use connection factory on every new peer discovered', (done) => {
 
-        });
+        let testNetworkConnections = [];
 
-        describe('connector', () => {
+        const knownPeers: PeerInfo[] = [
+            {id: "0", type: "virtual", connectionParms: {}},
+            {id: "1", type: "virtual", connectionParms: {}}
+        ]
 
-            it('should use connection factory on every new peer discovered', (done) => {
+        const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
 
-                let testNetworkConnections = [];
+        const connectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
+            //tap((p: PeerInfo) => console.log("connecting " + p.id)),
 
-                const knownPeers: PeerInfo[] = [
-                    {id: "0", type: "virtual", connectionParms: {}},
-                    {id: "1", type: "virtual", connectionParms: {}}
-                ]
+            mergeMap((p) => from(Promise.resolve(p))),
 
-                const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
+            //tap((p: PeerInfo) => console.log("connected " + p.id)),
 
-                const connectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
-                    tap((p: PeerInfo) => console.log("connecting " + p.id)),
+            tap(p => testNetworkConnections.push(p))
+        );
 
-                    mergeMap((p) => from(Promise.resolve(p))),
+        new Connector(connectionCreator, peers, from([]))
 
-                    tap((p: PeerInfo) => console.log("connected " + p.id)),
+        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
 
-                    tap(p => testNetworkConnections.push(p))
-                );
+        setTimeout(() => {
 
-                new Connector(connectionCreator, peers, from([]))
 
-                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
-                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
-                peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+            done();
 
-                setTimeout(() => {
-
-                    console.log(testNetworkConnections)
-
-                    done();
-
-                }, 1000)
-            })
-
-        })
-
+        }, 1000)
     })
+
 });
 
-const makeConnectionSim = (peer) => {
-    return new Promise((res, rej) => {
-        setTimeout(() => res(peer), Math.random() * 100)
-    })
-}
 
-makeConnectionSim({})
+
+

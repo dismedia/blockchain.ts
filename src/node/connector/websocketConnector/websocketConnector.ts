@@ -1,3 +1,5 @@
+export const g=0;
+
 /*
 export const websocketConnectorFactory: ConnectorCreator = (peers: Observable<PeerInfo[]>, settings, messagesToBroadcats: Observable<NodeMessage>) => settings.pipe(
     filter((s: ConnectorSettings) => s.type == "websocket"),

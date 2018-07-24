@@ -6,13 +6,13 @@ export const storeFactory = <Action, State>(reducer: (action: Action, state: Sta
 
     return (actions: Observable<Action>): Observable<State> => {
 
-        const output = actions.pipe(scan<Action, State>((acc: State, val: Action) => {
+        const output = actions.pipe(startWith(initState),scan<Action, State>((acc: State, val: Action) => {
 
                 return reducer(val, acc)
 
-            }, initState),
+            }),
             shareReplay(1),
-            startWith(initState)
+
         );
 
         output.subscribe();

@@ -7,7 +7,7 @@ const assert = chai.assert;
 
 describe('store facory', () => {
 
-    it('should give current state on subscribe', (done) => {
+    it('should give current state on subscribe', () => {
 
 
 
