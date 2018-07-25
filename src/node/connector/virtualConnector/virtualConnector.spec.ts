@@ -13,8 +13,13 @@ describe('connector', () => {
 
     it('should send and receive messages', (done) => {
 
+
+        //const log=(s)=>console.log(s);
+        const log = (s) => {
+        };
+
         const bus = new Subject<NodeMessage>();
-        //bus.subscribe((m: any) => console.log("bus: " + m.data))
+
 
         const createEnvForPeer = (id, otherPeerId) => {
 
@@ -24,7 +29,7 @@ describe('connector', () => {
             ];
 
             const testConnectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
-                mergeMap((p) => fromPromise(connection({id})(p))),
+                mergeMap((p) => fromPromise(connection({id}, log)(p))),
             )
 
             const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
@@ -59,22 +64,22 @@ describe('connector', () => {
 
 });
 
-const connection = (context) => (p: PeerInfo) => new Promise<ConnectedPeer>((res, rej) =>
+const connection = (context, log: (s: string) => void) => (p: PeerInfo) => new Promise<ConnectedPeer>((res, rej) =>
 
     setTimeout(() => {
 
-        console.log("...connectiong " + context.id + " to " + p.id)
+        log("...connectiong " + context.id + " to " + p.id)
 
         res({
                 peer: p, connection: {
                     //receive:from([{} as NodeMessage]),
                     receive: (p.connectionParms.bus as Observable<NodeMessage>).pipe(
                         filter(m => m.from == p.id),
-                        tap((message) => console.log(context.id + " received message from " + message.from))
+                        tap((message) => log(context.id + " received message from " + message.from))
                     ),
                     send: (message) => {
 
-                        console.log(context.id + " sending data")
+                        log(context.id + " sending data")
 
                         message.from = context.id;
                         return Promise.resolve(p.connectionParms.bus.next(message))

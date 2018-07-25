@@ -39,7 +39,7 @@ export class Connector implements ConnectorFacade<NodeMessage> {
             })
 
         messagesToBroadcats.pipe(
-            tap((m) => console.log("got message to bradcast")),
+            //tap((m) => console.log("got message to bradcast")),
             withLatestFrom(connectedPeers),
             tap(combined => {
                 const [m, pees] = combined;
