@@ -1,51 +1,92 @@
 import {Connector} from "./virtualConnector";
-import {BehaviorSubject} from "rxjs/Rx";
-import {PeerConnectionCreator, PeerInfo} from "../connector";
+import {BehaviorSubject, Observable, Subject} from "rxjs/Rx";
+import {ConnectedPeer, PeerConnectionCreator, PeerInfo} from "../connector";
 import * as chai from "chai";
-import {from} from "rxjs/index";
-import {mergeMap, tap} from "rxjs/internal/operators";
+import {zip} from "rxjs/index";
+import {filter, mergeMap, tap} from "rxjs/internal/operators";
+import {NodeMessage} from "../../message/nodeMessage";
+import {fromPromise} from "rxjs/internal/observable/fromPromise";
 
 const assert = chai.assert;
 
-
 describe('connector', () => {
 
-    it('should use connection factory on every new peer discovered', (done) => {
+    it('should send and receive messages', (done) => {
 
-        let testNetworkConnections = [];
+        const bus = new Subject<NodeMessage>();
+        //bus.subscribe((m: any) => console.log("bus: " + m.data))
 
-        const knownPeers: PeerInfo[] = [
-            {id: "0", type: "virtual", connectionParms: {}},
-            {id: "1", type: "virtual", connectionParms: {}}
-        ]
+        const createEnvForPeer = (id, otherPeerId) => {
 
-        const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
+            const knownPeers: PeerInfo[] = [
+                {id: otherPeerId, type: "virtual", connectionParms: {bus: bus, id: id}},
 
-        const connectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
-            //tap((p: PeerInfo) => console.log("connecting " + p.id)),
+            ];
 
-            mergeMap((p) => from(Promise.resolve(p))),
+            const testConnectionCreator: PeerConnectionCreator = (peer) => peer.pipe(
+                mergeMap((p) => fromPromise(connection({id})(p))),
+            )
 
-            //tap((p: PeerInfo) => console.log("connected " + p.id)),
+            const peers = new BehaviorSubject<PeerInfo[]>(knownPeers)
 
-            tap(p => testNetworkConnections.push(p))
-        );
+            const mtb = new Subject<NodeMessage>();
 
-        new Connector(connectionCreator, peers, from([]))
+            return {
+                messagesToBroadcast: mtb,
+                connector: new Connector(testConnectionCreator, peers, mtb)
+            }
 
-        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
-        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
-        peers.next([{id: "3", type: "virtual", connectionParms: {}}])
+        };
+
+        const env1 = createEnvForPeer("1", "2");
+        const env2 = createEnvForPeer("2", "1");
 
         setTimeout(() => {
+            zip(env1.connector.messages, env2.connector.messages).subscribe((ms: any) => {
 
+                assert.equal(ms[0].data, "some data from 2");
+                assert.equal(ms[1].data, "some data from 1");
 
-            done();
+                done();
+            })
 
-        }, 1000)
+            env2.messagesToBroadcast.next({data: "some data from 2"} as any);
+            env1.messagesToBroadcast.next({data: "some data from 1"} as any);
+
+        }, 500)
+
     })
 
 });
+
+const connection = (context) => (p: PeerInfo) => new Promise<ConnectedPeer>((res, rej) =>
+
+    setTimeout(() => {
+
+        console.log("...connectiong " + context.id + " to " + p.id)
+
+        res({
+                peer: p, connection: {
+                    //receive:from([{} as NodeMessage]),
+                    receive: (p.connectionParms.bus as Observable<NodeMessage>).pipe(
+                        filter(m => m.from == p.id),
+                        tap((message) => console.log(context.id + " received message from " + message.from))
+                    ),
+                    send: (message) => {
+
+                        console.log(context.id + " sending data")
+
+                        message.from = context.id;
+                        return Promise.resolve(p.connectionParms.bus.next(message))
+                    }
+                }
+            }
+        )
+
+    }, 100)
+)
+
+
 
 
 
