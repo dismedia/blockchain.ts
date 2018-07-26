@@ -2,6 +2,7 @@ import {PeerInfo} from "../connector/connector";
 import {Observable, Subject} from "rxjs/Rx";
 import {NodeMessage} from "../message/nodeMessage";
 import {from} from "rxjs/index";
+import * as sinon from "sinon";
 
 export interface SocketFactory {
     (socket): ConnectionFactory
@@ -55,10 +56,15 @@ export const socketConnectionFactory: SocketFactory =
 
 describe('socket connection factory ', function () {
 
-    it('should create Connection', function (done) {
+    it('should create use socket bridge to create connection', function (done) {
 
-        const socket = {
+        const connectSpy = sinon.spy();
+
+        const socketBridge: SocketClientBridge = {
+
             connect: () => {
+                connectSpy();
+
                 return Promise.resolve({
                     send: () => {
                     },
@@ -70,9 +76,16 @@ describe('socket connection factory ', function () {
         const peer1: PeerInfo = {connectionParms: "", type: "test", id: "0"};
         const mtb = new Subject<NodeMessage>();
 
-        const connectPeer = socketConnectionFactory(socket)
+        const connectPeer = socketConnectionFactory(socketBridge)
 
-        connectPeer(peer1, mtb)
+        connectPeer(peer1, mtb).subscribe(() => {
+        }, () => {
+        }, () => {
+            connectSpy.called;
+            done()
+        })
+
+
 
     });
 

@@ -1,14 +1,9 @@
 import * as chai from "chai";
 import {mergeMap} from "rxjs/operators";
-
 import {Observable, Subject} from "rxjs/Rx";
-
 import * as sinon from "sinon";
-
 import {distinct} from "rxjs/internal/operators";
-
 import {PeerInfo} from "../connector/connector";
-
 import {NodeMessage} from "../message/nodeMessage";
 import {from} from "rxjs/index";
 import {ConnectionFactory} from "./connection.spec";
