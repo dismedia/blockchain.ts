@@ -1,5 +1,5 @@
 import {scan, shareReplay} from "rxjs/operators";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs/index";
 import {startWith} from "rxjs/internal/operators";
 
 export const storeFactory = <Action, State>(reducer: (action: Action, state: State) => State, initState: State) => {

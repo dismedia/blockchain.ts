@@ -1,6 +1,7 @@
 import {storeFactory} from "./storeFactory";
-import {Subject} from "rxjs/Rx";
+
 import * as chai from "chai";
+import {Subject} from "rxjs/index";
 
 
 const assert = chai.assert;

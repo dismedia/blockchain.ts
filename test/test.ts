@@ -1,7 +1,6 @@
 import * as chai from "chai";
-import {from} from "rxjs";
+import {from, Observable, Subject} from "rxjs";
 import {map, scan, shareReplay, withLatestFrom} from "rxjs/operators";
-import {Observable, Subject} from "rxjs/Rx";
 
 const assert = chai.assert;
 

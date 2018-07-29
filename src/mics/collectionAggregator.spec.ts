@@ -1,6 +1,7 @@
 import * as chai from "chai";
 import {collectionDifference} from "./collectionsAgregator";
-import {BehaviorSubject, Observable} from "rxjs/Rx";
+import {BehaviorSubject, Observable} from "rxjs/index";
+
 
 const assert = chai.assert;
 

@@ -1,5 +1,5 @@
 import {PeerInfo} from "../connector/connector";
-import {Observable, Subject} from "rxjs/Rx";
+import {Observable, Subject} from "rxjs";
 import {NodeMessage} from "../message/nodeMessage";
 import {from} from "rxjs/index";
 import * as sinon from "sinon";

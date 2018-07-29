@@ -7,7 +7,6 @@
     "mocha": "^5.2.0",
     "node-storage": "^0.0.7",
     "rxjs": "^6.2.2",
-    "rxjs-compat": "^6.2.2",
     "ts-node": "^7.0.0",
     "typescript": "^2.9.2",
     "ws": "^6.0.0"

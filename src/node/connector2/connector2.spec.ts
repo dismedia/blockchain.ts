@@ -1,11 +1,11 @@
 import * as chai from "chai";
 import {mergeMap} from "rxjs/operators";
-import {Observable, Subject} from "rxjs/Rx";
+import {from, Observable, Subject} from "rxjs";
 import * as sinon from "sinon";
 import {distinct} from "rxjs/internal/operators";
 import {PeerInfo} from "../connector/connector";
 import {NodeMessage} from "../message/nodeMessage";
-import {from} from "rxjs/index";
+
 import {ConnectionFactory} from "./connection.spec";
 import {emptyStream} from "../../mics/store/stream";
 
@@ -21,6 +21,14 @@ const createConnector: Connector = (peer: Observable<PeerInfo>, connectionFactor
         distinct(p => p.id),
         mergeMap((p) => connectionFactory(p, toBroatcast))
     );
+
+// peer.pipe(
+//     scan((acum,peer:PeerInfo)=>{
+//         if(acum.some(p=>peer.id==p.id))
+//         acum.push(peer)
+//         return acum
+//     },[])
+// )
 
 describe('abstract connector', function () {
 

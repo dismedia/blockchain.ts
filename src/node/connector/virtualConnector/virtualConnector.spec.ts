@@ -1,5 +1,5 @@
 import {Connector} from "./virtualConnector";
-import {BehaviorSubject, Observable, Subject} from "rxjs/Rx";
+import {BehaviorSubject, Observable, Subject} from "rxjs";
 import {ConnectedPeer, PeerConnectionCreator, PeerInfo} from "../connector";
 import * as chai from "chai";
 import {zip} from "rxjs/index";

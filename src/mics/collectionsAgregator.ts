@@ -1,6 +1,6 @@
 import {map} from "rxjs/operators";
 import {from} from "rxjs/index";
-import {Observable} from "rxjs/Rx";
+import {Observable} from "rxjs";
 import {mergeMap, withLatestFrom} from "rxjs/internal/operators";
 
 export const collectionDifference =
