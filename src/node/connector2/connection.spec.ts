@@ -9,7 +9,8 @@ export interface SocketFactory {
 }
 
 export interface ConnectionFactory {
-    (peer: PeerInfo, toBroadcast: Observable<NodeMessage>): Observable<NodeMessage>
+
+    (toBroadcast: Observable<NodeMessage>): (peer: PeerInfo) => Observable<NodeMessage>
 }
 
 export interface SocketClientBridge {
@@ -23,34 +24,25 @@ export interface SocketClientBridge {
 
 export const socketConnectionFactory: SocketFactory =
 
-    (socket: SocketClientBridge) => {
+    (socket: SocketClientBridge) =>
+        (toBroadcast: Observable<NodeMessage>) =>
+            (peer: PeerInfo) => {
 
-        return (peer: PeerInfo, toBroadcast: Observable<NodeMessage>) => {
+                const messages = new Subject<NodeMessage>()
 
-            const messages = new Subject<NodeMessage>()
 
-            const connectAgain = (e) => {
-                connect();
+                const connect = () => socket.connect(peer.connectionParms).then(socketConnection => {
+
+                    toBroadcast.subscribe((m: NodeMessage) => socketConnection.send(m))
+
+                    socketConnection.messages.subscribe((m) => messages.next(m))
+
+                })
+
+                return from([]);
+
             }
 
-            const connect = () => socket.connect(peer.connectionParms).then(socketConnection => {
-
-                toBroadcast.subscribe((m: NodeMessage) => socketConnection.send(m))
-
-                socketConnection.messages.subscribe((m) => messages.next(m),
-                    (e) => {
-                        connectAgain(e)
-                    }, () => {
-                        connectAgain(null)
-                    })
-
-            }).catch((e) => connectAgain(e))
-
-            return from([]);
-
-        }
-
-    }
 
 //export const peerConnection:PeerConnection
 
@@ -78,13 +70,12 @@ describe('socket connection factory ', function () {
 
         const connectPeer = socketConnectionFactory(socketBridge)
 
-        connectPeer(peer1, mtb).subscribe(() => {
+        connectPeer(mtb)(peer1).subscribe(() => {
         }, () => {
         }, () => {
             connectSpy.called;
             done()
         })
-
 
 
     });

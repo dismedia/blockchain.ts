@@ -1,7 +1,7 @@
 import * as chai from "chai";
-import {from} from "rxjs/index";
+import {from, interval, noop, zip} from "rxjs/index";
 import {only} from "./only";
-import {tap} from "rxjs/internal/operators";
+import {map, tap} from "rxjs/internal/operators";
 import * as sinon from "sinon";
 
 const assert = chai.assert;
@@ -39,6 +39,20 @@ describe('only', function () {
                 done()
             })
 
+
+    })
+
+
+    it('zip', function (done) {
+
+
+        zip(from([[10], [20], [30], [10]]), interval(300)).pipe(map(a => a[0]),).subscribe((e) => {
+
+            console.log(e)
+
+        }, noop, () => {
+            done()
+        })
 
     })
 })

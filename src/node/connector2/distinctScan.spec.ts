@@ -1,9 +1,8 @@
-import {from, interval, Observable, of, pipe} from "rxjs";
-import {filter, mergeAll, mergeMap, scan, skip} from "rxjs/operators";
-
+import {from, interval, Observable, of, pipe, zip} from "rxjs";
+import {catchError, delay, filter, finalize, map, mapTo, mergeAll, mergeMap, scan, skip, take} from "rxjs/operators";
 import * as sinon from "sinon";
 import * as chai from "chai";
-import {catchError, delay, finalize, map, mapTo, take, tap} from "rxjs/internal/operators";
+
 import {only} from "../../mics/only";
 
 
@@ -100,7 +99,7 @@ describe('distinct scan', function () {
 
     });
 
-    it('should let to create anotcher stream for same params if last one completes', (done) => {
+    it('should let to create another stream for same params if last one completes', (done) => {
 
 
         let spy = sinon.spy();
@@ -111,28 +110,29 @@ describe('distinct scan', function () {
 
             if (e == 1) {
                 return of(e).pipe(
+                    delay(100),
                     map(() => {
                         throw "cr@p"
                     })
                 )
-            } else {
-                return of(e)
             }
+            return interval(1000).pipe(mapTo(e))
 
 
         }
 
 
-        from([[1], [1], [2]]).pipe(
+        zip(from([[1], [1], [2], [1, 2], [3]]), interval(200)).pipe(
+            map(a => a[0]),
             distinctCreate<number, number>(elementStreamCreator),
 
-            tap(e => console.log(e)),
-            only(0)
+
+            only(1)
         ).subscribe(e => {
 
 
-            assert.equal(e[0], 2);
-            assert.equal(spy.callCount, 3);
+            assert.equal(e[0], 3);
+            assert.equal(spy.callCount, 5);
 
             //done()
 
@@ -144,13 +144,10 @@ describe('distinct scan', function () {
         })
 
 
-    })
+    }).timeout(5000)
 
 })
-;
 
-const f = <T>(a) => a;
-const foo = <T extends {}>(x: T) => x;
 
 interface ElementStreamCreator<T, K> {
     (params: T): Observable<K>
@@ -159,23 +156,24 @@ interface ElementStreamCreator<T, K> {
 interface IndicatedtedStream<T, K> {
     stream: Observable<K>,
     identify: (t: T) => boolean
+    //remove:(a:IndicatedtedStream<T, K>[])=>void
 }
 
 interface DistinctAcumulator<T, K> {
     acumulated: IndicatedtedStream<T, K>[]
     news: Observable<K>[]
+
+    acum2: Observable<IndicatedtedStream<T, K>[]>
 }
 
 const distinctCreate = <T, K>(elementStreamCreator) => pipe(
     scan((a: DistinctAcumulator<T, K>, newElements: T[]) => {
 
-            console.log("exisitng streams: " + a.acumulated.length);
 
-            const n = newElements.filter((e: T) => !a.acumulated.some((existingStream) => existingStream.identify(e)))
+        const n = newElements.filter((e: T) => !a.acumulated.filter(a => a.identify != null).some((existingStream) => existingStream.identify(e)))
                 .map((e: T) => ({
                         stream: elementStreamCreator(e),
                         identify: (p) => p == e
-
 
                     }) as IndicatedtedStream<T, K>
                 );
@@ -183,18 +181,11 @@ const distinctCreate = <T, K>(elementStreamCreator) => pipe(
 
             const finalizeableOutput = n.map((e: IndicatedtedStream<T, K>) => {
                 return e.stream.pipe(
-                    //map(e => (e as any) + 0),
-                    filter(w => true),
-
                     catchError(() => {
-                        // console.log("err " + e.identify)
                         return from([]);
                     }),
-
                     finalize(() => {
-                        //console.log("done " + e.identify)
-                        // a.acumulated=a.acumulated.filter((a)=>!a.identify(e))
-
+                        e.identify = null;
                         return from([]);
                     })
                 )
@@ -202,19 +193,15 @@ const distinctCreate = <T, K>(elementStreamCreator) => pipe(
 
 
             return {
-                acumulated: [...a.acumulated, ...n],
+                acumulated: [...a.acumulated, ...n].filter(a => a.identify != null),
                 news: finalizeableOutput
             } as DistinctAcumulator<T, K>
         }, {acumulated: [], news: []}
     ),
     filter(s => s.news.length > 0),
-
     mergeMap(s => {
-
         return s.news
-
     }),
-
     mergeAll()
 );
 
